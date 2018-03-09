@@ -9,6 +9,8 @@ def CLCS(A,B):
 		currLCS = LCS(cut(A, i), B)
 		if currLCS > bestLCS:
 			bestLCS = currLCS
+			if bestLCS == len(A): # catches a perfect match
+				return bestLCS
 	return bestLCS
 
 def main():
