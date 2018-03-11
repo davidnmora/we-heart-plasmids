@@ -1,20 +1,24 @@
 import sys
 import numpy as np
 
+lowerMatrix = np.zeros((2048, 2048), dtype=int)
+upperMatrix = np.zeros((2048, 2048), dtype=int)
+dpTable = np.zeros((2*2048, 2048), dtype=int)
+#SingleShortestPath: updates the DP table for the values within the bounds, and then
+#backtrack to get fill in the upper and lower paths for the matrices
 def singleShortestPath(A,B, pathStartIndex, lowerBoundPath, upperBoundPath):
-	arr = np.zeros((2048, 2048), dtype=int)
+	#dpTable = np.zeros((2048, 2048), dtype=int)
 	m = len(A)
 	n = len(B)
-
+	# 1. FILL IN DP TABLE (within bounding constraints)
 	for i in range(1,m+1):
 		for j in range(1,n+1):
 			if A[i-1] == B[j-1]:
-				arr[i][j] = arr[i-1][j-1]+1
+				dpTable[i][j] = dpTable[i-1][j-1]+1
 			else:
-				arr[i][j] = max(arr[i-1][j], arr[i][j-1])
-
-	# TO DO: store upper and lower path in their respective matrixes
-	return arr[m][n]
+				dpTable[i][j] = max(dpTable[i-1][j], dpTable[i][j-1])
+	# 2. BACKTRACCE TO STORE SHORTEST PATH IN lowerMatrix and upperMatrix
+	return
 
 def findShortestPath(A, B, p, l, u):
 	print p
@@ -25,6 +29,7 @@ def findShortestPath(A, B, p, l, u):
 	p[mid] = singleShortestPath(A, B, mid, p[l], p[u])
 	findShortestPath(A, B, p, l, mid)
 	findShortestPath(A, B, p, mid, u)
+	return
 
 def main():
 	if len(sys.argv) != 1:
@@ -36,10 +41,10 @@ def main():
 		l = 0
 		u = len(A) - 1
 		# find initial bounding path
-		zeros = np.zeros(len(B), dtype=int)
-		uppers = np.full(2, len(A), dtype=int)
-		p[0] = singleShortestPath(A, B, l, zeros, uppers)
-		p[u] = singleShortestPath(A, B, u, zeros, uppers)
+		upperMatrix[l] = np.zeros(len(B), dtype=int)
+		lowerMatrix[u] = np.full(2, len(B), dtype=int)
+		singleShortestPath(A, B, l, zeros, uppers)
+		singleShortestPath(A, B, u, zeros, uppers)
 		findShortestPath(A, B, p, l, u) # TO DO: return shortest path
 	return
 
