@@ -1,13 +1,14 @@
 import sys
 import numpy as np
 
-lowerMatrix = np.zeros((2048, 2048), dtype=int)
-upperMatrix = np.zeros((2048, 2048), dtype=int)
-dpTable = np.zeros((2*2048, 2048), dtype=int)
+MATRIX_SIZE = 2048
+
+lowerMatrix = np.zeros((MATRIX_SIZE, MATRIX_SIZE), dtype=int)
+upperMatrix = np.zeros((MATRIX_SIZE, MATRIX_SIZE), dtype=int)
+dpTable = np.zeros((2*MATRIX_SIZE, MATRIX_SIZE), dtype=int)
 #SingleShortestPath: updates the DP table for the values within the bounds, and then
 #backtrack to get fill in the upper and lower paths for the matrices
 def singleShortestPath(A,B, pathStartIndex, lowerBoundPath, upperBoundPath):
-	#dpTable = np.zeros((2048, 2048), dtype=int)
 	m = len(A)
 	n = len(B)
 	# 1. FILL IN DP TABLE (within bounding constraints)
@@ -20,15 +21,15 @@ def singleShortestPath(A,B, pathStartIndex, lowerBoundPath, upperBoundPath):
 	# 2. BACKTRACCE TO STORE SHORTEST PATH IN lowerMatrix and upperMatrix
 	return
 
-def findShortestPath(A, B, p, l, u):
-	print p
-	if u - l <= 1:
+def findShortestPath(A, B, lowerMatrix, upperMatrix, l, u):
+	print "findShortestPath: l = %d, u = %d" % (l, u)
+	if l - u <= 1:
 		return
 	mid = (l + u) / 2
 	print "mid: %d" % mid
-	p[mid] = singleShortestPath(A, B, mid, p[l], p[u])
-	findShortestPath(A, B, p, l, mid)
-	findShortestPath(A, B, p, mid, u)
+	singleShortestPath(A, B, mid, lowerMatrix[l], upperMatrix[u])
+	findShortestPath(A, B, lowerMatrix, upperMatrix, l, mid)
+	findShortestPath(A, B, lowerMatrix, upperMatrix, mid, u)
 	return
 
 def main():
@@ -38,14 +39,14 @@ def main():
 	for l in sys.stdin:
 		A,B = l.split()
 		p = np.zeros(len(A), dtype=int)
-		l = 0
-		u = len(A) - 1
-		# find initial bounding path
-		upperMatrix[l] = np.zeros(len(B), dtype=int)
-		lowerMatrix[u] = np.full(2, len(B), dtype=int)
-		singleShortestPath(A, B, l, zeros, uppers)
-		singleShortestPath(A, B, u, zeros, uppers)
-		findShortestPath(A, B, p, l, u) # TO DO: return shortest path
+		l = len(A) - 1
+		u = 0
+		# SETUP: find initial bounding path before running recursive algorithm
+		singleShortestPath(A, B, l, lowerMatrix[l], upperMatrix[u])
+		singleShortestPath(A, B, u, lowerMatrix[l], upperMatrix[u])
+
+		# THE REAL DEAL: run the algorithm
+		findShortestPath(A, B, lowerMatrix, upperMatrix, l, u) # TO DO: return shortest path
 	return
 
 if __name__ == '__main__':
