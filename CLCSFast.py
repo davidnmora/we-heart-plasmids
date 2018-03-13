@@ -3,9 +3,13 @@ import numpy as np
 
 MATRIX_SIZE = 2048
 
+#Matrix to keep track of lower boundary paths
 lowerMatrix = np.zeros((MATRIX_SIZE, MATRIX_SIZE), dtype=int)
+#Matrix to keep track of upper boundary paths
 upperMatrix = np.zeros((MATRIX_SIZE, MATRIX_SIZE), dtype=int)
+#2mxn DP table
 dpTable = np.zeros((2*MATRIX_SIZE, MATRIX_SIZE), dtype=int)
+#Array to keep track of the results from each case, return the largest result
 results = []
 
 def isInBounds(row, col, lowerBoundPath, upperBoundPath):
