@@ -21,6 +21,7 @@ def isInBounds(row, col, lowerBoundPath, upperBoundPath):
 def backtrackUpper(A, B, pathStartIndex, l, u):
 	i = len(A)
 	j = len(B)
+	#Can only take left steps
 	left = False
 	while i >= 0 and j >= 0:
 		#Diagonal
@@ -56,7 +57,9 @@ def backtrackUpper(A, B, pathStartIndex, l, u):
 def backtrackLower(A, B, pathStartIndex, l, u):
 	i = len(A)
 	j = len(B)
+	#Previous move was a vertical step up
 	top = False
+	#Can only take left steps
 	left = False
 	while i >= 0 and j >= 0:
 		if (i > 0 and j > 0):
