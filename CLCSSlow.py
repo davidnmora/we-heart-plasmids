@@ -19,7 +19,7 @@ def main():
 	
 	for line in sys.stdin:
 		A,B = line.split()
-		print "SOLUTION: " + str(CLCS(A,B))
+		print CLCS(A,B)
 	return
 
 if __name__ == '__main__':
