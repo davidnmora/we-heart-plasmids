@@ -15,30 +15,27 @@ results = []
 def isInBounds(row, col, lowerBoundPath, upperBoundPath):
 	return (row >= upperBoundPath[col]) and (row <= lowerBoundPath[col])
 
-#TODO for both backtracks, check bounds!!
 #Backtracking for upper bound. Should go LEFT when up and left are the same. Save the TOP
 #node for vertical columns
 def backtrackUpper(A, B, pathStartIndex, l, u, first):
 	i = len(A)
 	j = len(B)
 	while i > 0 and j > 0:
-		#print("i", i)
-		#print("j", j)
-		#Take UP first
+		#Take the UP step
 		if ((isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first)):
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			i-=1
+
 		#Diagonal
-		elif (dpTable[pathStartIndex+i-1][j-1]+1 == dpTable[pathStartIndex+i][j] and (isInBounds(pathStartIndex+i-1, j-1, lowerMatrix[u], upperMatrix[l]) or first)):
+		elif ((isInBounds(pathStartIndex+i-1, j-1, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i-1][j-1]+1 == dpTable[pathStartIndex+i][j]):
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			i -= 1
 			j -= 1
-			#print("DIAGONAL")
+
 		#If can't take diagonal, take left
 		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first):
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			j-=1
-			#print("LEFT")
 
 	#For the cases when j or i is 0, but the other is not yet
 	while i > 0  or j > 0:
@@ -62,22 +59,22 @@ def backtrackLower(A, B, pathStartIndex, l, u, first):
 	j = len(B)
 	#Previous move was a vertical step up
 	top = False
-	#Can only take left steps
-	left = False
 	while i > 0 and j > 0:
-		#Take left first
-		if (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first):
-			if not top:
-				lowerMatrix[pathStartIndex][j] = i+pathStartIndex
-			j-=1
-			top = False
-		#Diagonal
-		elif (dpTable[pathStartIndex+i-1][j-1]+1 == dpTable[pathStartIndex+i][j] and (isInBounds(pathStartIndex+i-1, j-1, lowerMatrix[u], upperMatrix[l]) or first)):
+		#Take the diagonal
+		if ((isInBounds(pathStartIndex+i-1, j-1, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i-1][j-1]+1 == dpTable[pathStartIndex+i][j]):
 			if not top:
 				lowerMatrix[pathStartIndex][j] = i+pathStartIndex
 			i-=1
 			j-=1
 			top = False
+
+		#Take left last
+		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first):
+			if not top:
+				lowerMatrix[pathStartIndex][j] = i+pathStartIndex
+			j-=1
+			top = False
+
 		#If can't take diagonal, take up
 		elif (isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first):
 			if not top:
@@ -128,20 +125,15 @@ def singleShortestPath(A,B, pathStartIndex, l, u, first):
 						#Left is in bounds, but up is not
 						dpTable[pathStartIndex+row][col] = dpTable[pathStartIndex+row][col-1]
 			# 2. BACKTRACCE TO STORE SHORTEST PATH IN lowerMatrix and upperMatrix
-	#print dpTable
 	results.append(dpTable[pathStartIndex+m][n])
 	backtrackUpper(A,B,pathStartIndex,l,u, first)
 	backtrackLower(A,B,pathStartIndex,l,u, first)
-	#print upperMatrix
-	#print lowerMatrix
 	return
 
 def findShortestPath(A, B, lowerMatrix, upperMatrix, l, u):
-	#print "findShortestPath: l = %d, u = %d" % (l, u)
 	if u - l <= 1:
 		return
 	mid = (l + u) / 2
-	#print "mid: %d" % mid
 	singleShortestPath(A, B, mid, l, u, False)
 	findShortestPath(A, B, lowerMatrix, upperMatrix, l, mid)
 	findShortestPath(A, B, lowerMatrix, upperMatrix, mid, u)
@@ -156,16 +148,20 @@ def main():
 		p = np.zeros(len(A), dtype=int)
 		l = 0
 		u = len(A)
-		# SETUP: find initial bounding path before running recursive algorithm
-		singleShortestPath(A, B, l, l, u, True)
-		singleShortestPath(A, B, u, l, u, True)
 
-		# THE REAL DEAL: run the algorithm
-		findShortestPath(A, B, lowerMatrix, upperMatrix, l, u) # TO DO: return shortest path
-		#Case if a string is only 1 letter long
-		if u == 1:
-			if A in B:
-				results.append(1)
+		#Case if string A is a substring of B
+		if A in B:
+			results.append(len(A))
+		elif B in A:
+			results.append(len(B))
+		else:
+			# SETUP: find initial bounding path before running recursive algorithm
+			singleShortestPath(A, B, l, l, u, True)
+			singleShortestPath(A, B, u, l, u, True)
+
+			# THE REAL DEAL: run the algorithm
+			findShortestPath(A, B, lowerMatrix, upperMatrix, l, u) # TO DO: return shortest pat
+
 		shortestPath = max(results)
 		print shortestPath
 		#Clear the results array for the next problem
