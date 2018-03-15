@@ -22,17 +22,17 @@ def backtrackUpper(A, B, pathStartIndex, l, u, first):
 	j = len(B)
 	while i > 0 and j > 0:
 		#Take up
-		if ((isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first)):
+		if ((isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i-1][j] == dpTable[pathStartIndex+i][j]):
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			i-=1
+
 		#Diagonal
 		elif ((isInBounds(pathStartIndex+i-1, j-1, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i-1][j-1]+1 == dpTable[pathStartIndex+i][j]):
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			i -= 1
 			j -= 1
-
 		#Take the Left step
-		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first):
+		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i][j-1] == dpTable[pathStartIndex+i][j]:
 			upperMatrix[pathStartIndex][j] = i+pathStartIndex
 			j-=1
 
@@ -65,16 +65,14 @@ def backtrackLower(A, B, pathStartIndex, l, u, first):
 			i-=1
 			j-=1
 			top = False
-
 		#Take left 
-		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first):
+		elif (isInBounds(pathStartIndex+i, j-1, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i][j-1] == dpTable[pathStartIndex+i][j]:
 			if not top:
 				lowerMatrix[pathStartIndex][j] = i+pathStartIndex
 			j-=1
 			top = False
-
 		#Take up 
-		elif (isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first):
+		elif (isInBounds(pathStartIndex+i-1, j, lowerMatrix[u], upperMatrix[l]) or first) and dpTable[pathStartIndex+i-1][j] == dpTable[pathStartIndex+i][j]:
 			if not top:
 				lowerMatrix[pathStartIndex][j] = i+pathStartIndex
 			i-=1
@@ -108,6 +106,7 @@ def singleShortestPath(A,B, pathStartIndex, l, u, first):
 	dpTable[pathStartIndex] = 0
 	dpTable[:,0] = 0
 	# 1. FILL IN DP TABLE (within bounding constraints)
+	# Start from upper[col] and lower[col]
 	for row in range(1, m+1):
 		for col in range(1,n+1):
 			if (isInBounds(row+pathStartIndex, col, lowerMatrix[u], upperMatrix[l])) or first:
@@ -127,7 +126,7 @@ def singleShortestPath(A,B, pathStartIndex, l, u, first):
 				elif left or first:
 					#Left is in bounds, but up is not
 					dpTable[pathStartIndex+row][col] = dpTable[pathStartIndex+row][col-1]
-			# 2. BACKTRACCE TO STORE SHORTEST PATH IN lowerMatrix and upperMatrix
+			# 2. BACKTRACE TO STORE SHORTEST PATH IN lowerMatrix and upperMatrix
 	results.append(dpTable[pathStartIndex+m][n])
 	backtrackUpper(A,B,pathStartIndex,l,u, first)
 	backtrackLower(A,B,pathStartIndex,l,u, first)
